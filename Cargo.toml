@@ -1,0 +1,18 @@
+[package]
+name = "chamkho-pg"
+version = "0.1.0"
+authors = ["Vee Satayamas <vee.sa@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "adding-stmt"
+path = "src/bin.rs"
+
+[dependencies]
+pg-extern-attr = { git = "https://github.com/veer66/pg-extend-rs" }
+pg-extend = { git = "https://github.com/veer66/pg-extend-rs" }
