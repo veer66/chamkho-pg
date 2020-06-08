@@ -1,93 +1,133 @@
 extern crate pg_extend;
 extern crate pg_extern_attr;
+#[macro_use]
+extern crate lazy_static;
+extern crate wordcut_engine;
 
-use pg_extend::pg_magic;
-use pg_extern_attr::pg_extern;
-//use pg_extend::PgTypeInfo;
 use pg_extend::info;
-use pg_extend::pg_datum::PgDatum;
+use pg_extend::pg_magic;
 use pg_extend::pg_sys;
-use std::ffi::CString;
-use std::os::raw::c_char;
+use pg_extend::pg_sys::{Datum, FunctionCallInfo, Pg_finfo_record};
+use std::path::Path;
+use wordcut_engine::{TextRange, Wordcut};
 
 pg_magic!(version: pg_sys::PG_VERSION_NUM);
 
 #[no_mangle]
-pub extern "C" fn pg_finfo_chamkho_parser_start() -> &'static pg_sys::Pg_finfo_record {
-    &pg_extend::pg_sys::Pg_finfo_record { api_version: 1 }
+pub extern "C" fn pg_finfo_chamkho_parser_start() -> &'static Pg_finfo_record {
+    &Pg_finfo_record { api_version: 1 }
 }
 
 #[no_mangle]
-pub extern "C" fn pg_finfo_chamkho_parser_get_token() -> &'static pg_sys::Pg_finfo_record {
-    &pg_extend::pg_sys::Pg_finfo_record { api_version: 1 }
+pub extern "C" fn pg_finfo_chamkho_parser_get_token() -> &'static Pg_finfo_record {
+    &Pg_finfo_record { api_version: 1 }
 }
 
 #[no_mangle]
-pub extern "C" fn pg_finfo_chamkho_parser_end() -> &'static pg_sys::Pg_finfo_record {
-    &pg_extend::pg_sys::Pg_finfo_record { api_version: 1 }
+pub extern "C" fn pg_finfo_chamkho_parser_end() -> &'static Pg_finfo_record {
+    &Pg_finfo_record { api_version: 1 }
 }
 
 #[no_mangle]
-pub extern "C" fn pg_finfo_chamkho_parser_lextype() -> &'static pg_sys::Pg_finfo_record {
-    &pg_extend::pg_sys::Pg_finfo_record { api_version: 1 }
+pub extern "C" fn pg_finfo_chamkho_parser_lextype() -> &'static Pg_finfo_record {
+    &Pg_finfo_record { api_version: 1 }
+}
+
+lazy_static! {
+    static ref WORDCUT: Wordcut = Wordcut::new(
+        wordcut_engine::load_dict(Path::new(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/data/dix.txt"
+        )))
+        .unwrap()
+    );
 }
 
 #[repr(C)]
 struct ParserCtx {
-    i: i32,
-    // char* text;         // the current position of text
-    // int text_len;       // the length of text
-    // char* buf;          // A text to parse
-    // int buf_len;        // the length of text
-    // int *pos;           // The position of a breaking word
-    // int num;            // The number of a breaking word
-    // int cur_id;         // An ID of current word
+    text: *const u8,
+    text_len: usize,
+    text_ranges: Vec<TextRange>,
+    word_idx: usize,
+    is_segmented: bool,
 }
 
 #[repr(C)]
 struct LexDescr {
     lexid: i32,
-    // int  lexid;
-    // char *alias;
-    // char *descr;
+    alias: *mut i8,
+    descr: *mut i8,
 }
 
 #[no_mangle]
-pub extern "C" fn chamkho_parser_start(func_call_info: pg_sys::FunctionCallInfo) -> pg_sys::Datum {
-    let ctx = unsafe { pg_sys::palloc0(std::mem::size_of::<ParserCtx>() as u64) as pg_sys::Datum };
-    let args: Vec<_> = unsafe { pg_extend::get_args(func_call_info.as_mut().unwrap()) }.collect();
-    let text_len = args[1].unwrap() as i32;
-    info!("!!!! TEXT-LEN = {:?}", text_len);
-
-    let raw_text = args[0].unwrap() as *mut u8;
-    let text_u8 = unsafe { std::slice::from_raw_parts(raw_text, text_len as usize) };
-    let text = String::from_utf8(text_u8.to_vec()).unwrap();
-    info!("!!! TEXT = {}", &text);
-    ctx
+pub extern "C" fn chamkho_parser_start(func_call_info: FunctionCallInfo) -> Datum {
+    unsafe {
+        let ctx = pg_sys::palloc0(std::mem::size_of::<ParserCtx>() as u64) as *mut ParserCtx;
+        let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
+        (*ctx).text = args[0].unwrap() as *const u8;
+        (*ctx).text_len = (args[1].unwrap() as i32) as usize;
+        (*ctx).is_segmented = false;
+        ctx as Datum
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn chamkho_parser_get_token(
-    func_call_info: pg_sys::FunctionCallInfo,
-) -> pg_sys::Datum {
-    let ctx = unsafe { pg_sys::palloc0(std::mem::size_of::<ParserCtx>() as u64) as pg_sys::Datum };
-//    let text = unsafe { pg_sys::PG_GETARG_POINTER(0) };
-    //Box::into_raw(Box::new(ChamkhoParser { i: 10 })) as pg_sys::Datum
-    ctx
+pub extern "C" fn chamkho_parser_get_token(func_call_info: FunctionCallInfo) -> Datum {
+    unsafe {
+        let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
+        let ctx = args[0].unwrap() as *mut ParserCtx;
+        let token = args[1].unwrap() as *mut *const u8;
+        let token_len = args[2].unwrap() as *mut i32;
+
+        if !(*ctx).is_segmented {
+            (*ctx).text_ranges = WORDCUT.segment_into_byte_ranges(&String::from_utf8_lossy(
+                std::slice::from_raw_parts((*ctx).text, (*ctx).text_len as usize),
+            ));
+            (*ctx).is_segmented = true;
+            (*ctx).word_idx = 0;
+        }
+
+        if (*ctx).word_idx >= (*ctx).text_ranges.len() {
+            *token_len = 0;
+            drop(&(*ctx).text_ranges);
+            (*ctx).is_segmented = false;
+            0
+        } else {
+            let r = &((*ctx).text_ranges[(*ctx).word_idx]);
+            let len = (r.e - r.s) as i32;
+            let buf = (*ctx).text.offset(r.s as isize);
+            *token_len = len;
+            *token = buf;
+            (*ctx).word_idx += 1;
+            'a' as Datum
+        }
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn chamkho_parser_end(_func_call_info: pg_sys::FunctionCallInfo) -> pg_sys::Datum {
-    let x = unsafe { pg_sys::palloc(10) as *mut u8 };
-    //Box::into_raw(Box::new(ChamkhoParser { i: 10 })) as pg_sys::Datum
-    x as pg_sys::Datum
+pub extern "C" fn chamkho_parser_end(func_call_info: FunctionCallInfo) -> Datum {
+    unsafe {
+        let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
+        let ctx = args[0].unwrap() as *mut ParserCtx;
+        pg_sys::pfree(ctx as *mut std::ffi::c_void);
+        0
+    }
 }
 
 #[no_mangle]
-pub extern "C" fn chamkho_parser_lextype(
-    _func_call_info: pg_sys::FunctionCallInfo,
-) -> pg_sys::Datum {
-    let x = unsafe { pg_sys::palloc(10) as *mut u8 };
-    //Box::into_raw(Box::new(ChamkhoParser { i: 10 })) as pg_sys::Datum
-    x as pg_sys::Datum
+pub extern "C" fn chamkho_parser_lextype(_func_call_info: FunctionCallInfo) -> Datum {
+    unsafe {
+        let descr = pg_sys::palloc0((std::mem::size_of::<LexDescr>() * 27) as u64) as *mut LexDescr;
+        (*descr.offset(0)).lexid = 97;
+        (*descr.offset(0)).alias = pg_sys::pstrdup(b"a".as_ptr() as *const i8);
+        (*descr.offset(0)).alias = pg_sys::pstrdup(b"Thai word".as_ptr() as *const i8);
+        (*descr.offset(1)).lexid = 98;
+        (*descr.offset(1)).alias = pg_sys::pstrdup(b"b".as_ptr() as *const i8);
+        (*descr.offset(1)).alias = pg_sys::pstrdup(b"English word".as_ptr() as *const i8);
+        (*descr.offset(2)).lexid = 99;
+        (*descr.offset(2)).alias = pg_sys::pstrdup(b"c".as_ptr() as *const i8);
+        (*descr.offset(2)).alias = pg_sys::pstrdup(b"Space".as_ptr() as *const i8);
+        (*descr.offset(26)).lexid = 0;
+        descr as Datum
+    }
 }
