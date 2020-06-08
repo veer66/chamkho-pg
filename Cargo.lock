@@ -87,6 +87,7 @@ dependencies = [
  "lazy_static",
  "pg-extend",
  "pg-extern-attr",
+ "regex",
  "wordcut-engine",
 ]
 

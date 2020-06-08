@@ -18,3 +18,4 @@ lazy_static = "1.4.0"
 pg-extern-attr = { git = "https://github.com/veer66/pg-extend-rs" }
 pg-extend = { git = "https://github.com/veer66/pg-extend-rs" }
 wordcut-engine = { git = "https://github.com/veer66/wordcut-engine" }
+regex = "1"
