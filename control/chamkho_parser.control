@@ -1,0 +1,4 @@
+comment = 'a Chamkho parser for full text search'
+default_version = '1.0'
+module_pathname = '$libdir/chamkho_parser'
+relocatable = true
