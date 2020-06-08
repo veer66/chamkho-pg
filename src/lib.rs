@@ -5,7 +5,6 @@ extern crate lazy_static;
 extern crate regex;
 extern crate wordcut_engine;
 
-use pg_extend::info;
 use pg_extend::pg_magic;
 use pg_extend::pg_sys;
 use pg_extend::pg_sys::{Datum, FunctionCallInfo, Pg_finfo_record};
@@ -54,7 +53,6 @@ struct ParserCtx {
 #[no_mangle]
 pub extern "C" fn chamkho_parser_start(func_call_info: FunctionCallInfo) -> Datum {
     unsafe {
-	info!("@@@ START");
         let ctx = pg_sys::palloc0(std::mem::size_of::<ParserCtx>() as u64) as *mut ParserCtx;
         let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
         (*ctx).text = args[0].unwrap() as *const u8;
@@ -67,7 +65,6 @@ pub extern "C" fn chamkho_parser_start(func_call_info: FunctionCallInfo) -> Datu
 #[no_mangle]
 pub extern "C" fn chamkho_parser_get_token(func_call_info: FunctionCallInfo) -> Datum {
     unsafe {
-	info!("@@@ GET-TOK");
         let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
         let ctx = args[0].unwrap() as *mut ParserCtx;
         let token = args[1].unwrap() as *mut *const u8;
@@ -108,7 +105,6 @@ pub extern "C" fn chamkho_parser_get_token(func_call_info: FunctionCallInfo) -> 
 #[no_mangle]
 pub extern "C" fn chamkho_parser_end(func_call_info: FunctionCallInfo) -> Datum {
     unsafe {
-	info!("@@@ END");
         let args: Vec<_> = pg_extend::get_args(func_call_info.as_mut().unwrap()).collect();
         let ctx = args[0].unwrap() as *mut ParserCtx;
         pg_sys::pfree(ctx as *mut std::ffi::c_void);
