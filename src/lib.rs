@@ -8,9 +8,9 @@ extern crate wordcut_engine;
 use pg_extend::pg_magic;
 use pg_extend::pg_sys;
 use pg_extend::pg_sys::{Datum, FunctionCallInfo, Pg_finfo_record};
+use regex::Regex;
 use std::path::Path;
 use wordcut_engine::{TextRange, Wordcut};
-use regex::Regex;
 
 pg_magic!(version: pg_sys::PG_VERSION_NUM);
 
@@ -43,7 +43,7 @@ lazy_static! {
         .unwrap()
     );
     static ref THAI_RE: Regex = Regex::new(r"[ก-์]").unwrap();
-    static ref SPACE_RE: Regex = Regex::new(r"[\s\t\r\n]").unwrap();    
+    static ref SPACE_RE: Regex = Regex::new(r"[\s\t\r\n]").unwrap();
 }
 
 #[repr(C)]
@@ -102,16 +102,14 @@ pub extern "C" fn chamkho_parser_get_token(func_call_info: FunctionCallInfo) -> 
             *token_len = len;
             *token = buf;
             (*ctx).word_idx += 1;
-	    let w = &String::from_utf8_lossy(
-                std::slice::from_raw_parts(buf, len as usize),
-            );
-	    (if THAI_RE.find(w).is_some() {
-		'a'
-	    } else if SPACE_RE.is_match(w) {
-		'c'
-	    } else {
-		'b'
-	    }) as Datum
+            let w = &String::from_utf8_lossy(std::slice::from_raw_parts(buf, len as usize));
+            (if THAI_RE.find(w).is_some() {
+                'a'
+            } else if SPACE_RE.is_match(w) {
+                'c'
+            } else {
+                'b'
+            }) as Datum
         }
     }
 }
