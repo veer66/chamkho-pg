@@ -1,6 +1,6 @@
 # chamkho-pg
 
-chamkho-pg is a [pg-search-thai](https://github.com/zdk/pg-search-thai) port to Rust.
+_chamkho-pg_ (Thai: _ชำฆ้อพีจี_) is a [pg-search-thai](https://github.com/zdk/pg-search-thai) port to Rust. _chamkho-pg_ is a PostgreSQL extension, which its objective is enabling PostgreSQL full-text searching on SE Asian languages. Currently, _chamkho-pg_ supports Lao and Thai.
 
 
 ## Latest result
