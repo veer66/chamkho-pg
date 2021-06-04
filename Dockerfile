@@ -1,4 +1,4 @@
-FROM rust:1.44 AS build
+FROM rust:1.52.1 AS build
 RUN wget https://ftp.postgresql.org/pub/source/v12.3/postgresql-12.3.tar.gz
 RUN tar xzf postgresql-12.3.tar.gz
 RUN cd postgresql-12.3; ./configure; make -j$(nproc); make install
