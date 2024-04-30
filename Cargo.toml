@@ -20,6 +20,7 @@ lazy_static = "1.4.0"
 #pg-extend = { git = "https://github.com/veer66/pg-extend-rs" }
 wordcut-engine = { git = "https://github.com/veer66/wordcut-engine" }
 regex = "1"
+cfg-if = "1.0.0"
 
 [build-dependencies]
 bindgen = "0.69.4"
