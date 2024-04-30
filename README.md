@@ -25,3 +25,7 @@ d4=# select to_tsvector('chamkho', 'ฉันกินข้าวຈະຊອ�
 (1 row)
 ````
 
+
+## Status
+
+chamkho-pg currently support PostgreSQL 15 on GNU/Linux.

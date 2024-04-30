@@ -23,7 +23,6 @@ fn main() {
     println!("cargo:rustc-link-search={}", pkg_lib_dir);
     println!("cargo:rustc-link-search={}", lib_dir);
     println!("cargo::rustc-link-arg=-fPIC");
-    //    println!("cargo::rustc-flags=-fPIC");
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
         .clang_arg(include_flag)
