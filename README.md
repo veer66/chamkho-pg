@@ -25,7 +25,57 @@ d4=# select to_tsvector('chamkho', 'ฉันกินข้าวຈະຊອ�
 (1 row)
 ````
 
-
 ## Status
 
 chamkho-pg currently support PostgreSQL 15 on GNU/Linux.
+
+## Example
+
+### Initiailize
+
+```
+create extension chamkho_parser;
+CREATE TEXT SEARCH CONFIGURATION chamkho (PARSER = chamkho_parser);
+ALTER TEXT SEARCH CONFIGURATION chamkho ADD MAPPING FOR word WITH simple;
+```
+
+### Prepare table
+
+```
+create table tab1(id serial, body text);
+insert into tab1(body) values ('ไก่กับเป็ด'), ('ช้างม้า'), ('วัวหมี');
+```
+
+### Query
+
+```
+select * from tab1 where to_tsvector('chamkho', body) @@ to_tsquery('เป็ด & ไก่');
+```
+
+### Index
+
+```
+CREATE INDEX tab1_idx ON tab1 USING GIN (to_tsvector('chamkho', body));
+```
+
+## Podman
+
+### Build
+
+```
+$ git clone https://github.com/veer66/chamkho-pg.git
+$ cd chamkho-pg
+$ podman build -t chamkho-pg .
+```
+
+### Run
+
+```
+$ podman run --name chamkho-pg-1 -e POSTGRES_PASSWORD=yourpass -d chamkho-pg
+```
+
+### Use
+
+```
+$ podman exec -it chamkho-pg-1 psql -U postgres
+```
