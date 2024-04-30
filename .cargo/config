@@ -1,0 +1,5 @@
+[target.'cfg(unix)']
+rustflags = "-C link-arg=-undefineddynamic_lookup"
+
+[target.'cfg(windows)']
+rustflags = "-C link-arg=/FORCE"
