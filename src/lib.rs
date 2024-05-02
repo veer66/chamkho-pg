@@ -375,7 +375,6 @@ lazy_static! {
         )))
         .unwrap()
     );
-    static ref THAI_RE: Regex = Regex::new(r"[ก-์]").unwrap();
     static ref SPACE_RE: Regex = Regex::new(r"[\s\t\r\n]").unwrap();
 }
 
@@ -429,9 +428,7 @@ fn chamkho_parser_get_token(func_call_info: sys::FunctionCallInfo) -> sys::Datum
             *token = buf;
             (*ctx).word_idx += 1;
             let w = &String::from_utf8_lossy(std::slice::from_raw_parts(buf, len as usize));
-            (if THAI_RE.find(w).is_some() {
-                2
-            } else if SPACE_RE.is_match(w) {
+            (if SPACE_RE.is_match(w) {
                 12
             } else {
                 2
