@@ -1,6 +1,6 @@
 [package]
 name = "chamkho-pg"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Vee Satayamas <vsatayamas@gmail.com>"]
 edition = "2021"
 build = "build.rs"
@@ -20,7 +20,7 @@ path = "src/bin.rs"
 
 [dependencies]
 lazy_static = "1.4.0"
-wordcut-engine = { git = "https://github.com/veer66/wordcut-engine" }
+wordcut-engine = { git = "https://codeberg.org/mekong-lang/wordcut-engine.git" }
 regex = "1"
 cfg-if = "1.0.0"
 
