@@ -49,7 +49,13 @@ fn main() {
 
     // Add macOS-specific include path for gettext if on macOS
     if cfg!(target_os = "macos") {
-        builder = builder.clang_arg("-I/opt/homebrew/opt/gettext/include");
+        let gettext_include = Command::new("brew")
+            .args(["--prefix", "gettext"])
+            .output()
+            .expect("Failed to get gettext path from brew")
+            .stdout;
+        let gettext_include = format!("-I{}/include", String::from_utf8_lossy(&gettext_include).trim_end());
+        builder = builder.clang_arg(&gettext_include);
     }
 
     let bindings = builder

@@ -29,7 +29,9 @@ to_tsvector
 
 ## Status
 
-chamkho-pg currently support PostgreSQL 15 on GNU/Linux.
+chamkho-pg currently supports PostgreSQL 15 and 16 on both GNU/Linux and macOS.
+
+Current Docker images are built with PostgreSQL 16.6.
 
 ## Example
 
