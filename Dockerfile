@@ -5,7 +5,7 @@ RUN wget https://ftp.postgresql.org/pub/source/v15.6/postgresql-15.6.tar.gz
 RUN tar xzf postgresql-15.6.tar.gz
 RUN cd postgresql-15.6; ./configure --prefix=/usr/local; make -j$(nproc); make install
 RUN mkdir /work
-COPY Cargo.toml Cargo.lock install.sh README.md build.rs wrapper.h .cargo /work/
+COPY Cargo.toml Cargo.lock install.sh README.md build.rs wrapper.h /work/
 COPY src/ /work/src/
 COPY control/ /work/control/
 COPY data/ /work/data/
