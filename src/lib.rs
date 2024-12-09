@@ -143,8 +143,8 @@ pub(crate) unsafe fn guard_pg<R, F: FnOnce() -> R>(f: F) -> R {
     let original_exception_stack: *mut sys::sigjmp_buf = sys::PG_exception_stack;
     let mut local_exception_stack: std::mem::MaybeUninit<sys::sigjmp_buf> =
         std::mem::MaybeUninit::uninit();
-    let jumped = sys::__sigsetjmp(
-        // grab a mutable reference, cast to a mutabl pointr, then case to the expected erased pointer type
+    let jumped = sys::sigsetjmp(
+        // grab a mutable reference, cast to a mutable pointer, then case to the expected erased pointer type
         local_exception_stack.as_mut_ptr() as *mut sys::sigjmp_buf as *mut _,
         1,
     );
