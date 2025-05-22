@@ -27,6 +27,10 @@ to_tsvector
 (1 row)
 ```
 
+## Talk
+
+PostgreSQL Extension for Full-Text Search in Any Language  https://youtube.com/watch?v=C6o71HQXTaQ
+
 ## Status
 
 chamkho-pg currently supports PostgreSQL 15 and 16 on both GNU/Linux and macOS.
