@@ -8,6 +8,7 @@ fn main() {
         .output()
         .unwrap();
     let lib_dir_out = Command::new("pg_config").arg("--libdir").output().unwrap();
+    let share_dir_out = Command::new("pg_config").arg("--sharedir").output().unwrap();
     let include_dir_out = Command::new("pg_config")
         .arg("--includedir-server")
         .output()
@@ -17,6 +18,8 @@ fn main() {
     let pkg_lib_dir = pkg_lib_dir.trim_end();
     let lib_dir = String::from_utf8_lossy(&lib_dir_out.stdout);
     let lib_dir = lib_dir.trim_end();
+    let share_dir = String::from_utf8_lossy(&share_dir_out.stdout);
+    let share_dir = share_dir.trim_end();
     let include_flag = format!("-I{}", String::from_utf8_lossy(&include_dir_out.stdout).trim_end());
 
     println!("cargo:rerun-if-changed=wrapper.h");
@@ -24,6 +27,7 @@ fn main() {
     println!("cargo:rustc-link-search={}", pkg_lib_dir);
     println!("cargo:rustc-link-search={}", lib_dir);
     println!("cargo::rustc-link-arg=-fPIC");
+    println!("cargo:rustc-env=PG_SHARE_DIR={}", share_dir);
 
     if cfg!(target_os = "macos") {
         // Get gettext lib path from brew

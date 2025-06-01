@@ -379,8 +379,8 @@ fn pg_finfo_chamkho_parser_end() -> &'static sys::Pg_finfo_record {
 lazy_static! {
     static ref WORDCUT: Wordcut = Wordcut::new(
         wordcut_engine::load_dict(Path::new(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/data/dix.txt"
+            env!("PG_SHARE_DIR"),
+            "/tsearch_data/chamkho_dix.txt"
         )))
         .unwrap()
     );

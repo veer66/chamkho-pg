@@ -6,8 +6,12 @@ if [ "$(uname)" = "Darwin" ]; then
     cp "target/release/libchamkho_parser.dylib" "$(pg_config --libdir)/postgresql/chamkho_parser.dylib"
     ln -sf "$(pg_config --libdir)/postgresql/chamkho_parser.dylib" "$(pg_config --libdir)/postgresql/chamkho_parser.so"
 else
-    cp "target/release/libchamkho_parser.so" "$(pg_config --libdir)/postgresql/chamkho_parser.so"
+    cp "target/release/libchamkho_parser.so" "$(pg_config --pkglibdir)/chamkho_parser.so"
 fi
 
 # Copy extension files
 cp control/*.control sql/*.sql "$(pg_config --sharedir)/extension"
+
+
+# Copy dix
+cp data/chamkho_dix.txt "$(pg_config --sharedir)/tsearch_data/"
