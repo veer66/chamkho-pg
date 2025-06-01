@@ -66,7 +66,6 @@ pub enum Level {
     Log = sys::LOG as isize,
     /// Same as LOG for server reporting, but never sent to client.
     ///   `CommError` is an alias for this
-    #[cfg(not(postgres9))]
     LogServerOnly = sys::LOG_SERVER_ONLY as isize,
     /// Messages specifically requested by user (eg VACUUM VERBOSE output); always sent to client
     /// regardless of client_min_messages, but by default not sent to server log.
