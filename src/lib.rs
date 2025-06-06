@@ -380,7 +380,7 @@ lazy_static! {
     static ref WORDCUT: Wordcut = Wordcut::new(
         wordcut_engine::load_dict(Path::new(concat!(
             env!("PG_SHARE_DIR"),
-            "/tsearch_data/chamkho_dix.txt"
+            "/tsearch_data/chamkho_dict.txt"
         )))
         .unwrap()
     );

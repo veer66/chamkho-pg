@@ -13,5 +13,5 @@ fi
 cp control/*.control sql/*.sql "$(pg_config --sharedir)/extension"
 
 
-# Copy dix
-cp data/chamkho_dix.txt "$(pg_config --sharedir)/tsearch_data/"
+# Copy the dictionary
+cp data/chamkho_dict.txt "$(pg_config --sharedir)/tsearch_data/"
