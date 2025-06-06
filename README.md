@@ -12,13 +12,13 @@ _chamkho-pg_ is a Rust port of [pg-search-thai](https://github.com/zdk/pg-search
 ## Latest result
 
 ```
-d4=# create extension chamkho_parser;
+d4=# CREATE EXTENSION chamkho_parser;
 CREATE EXTENSION
 d4=# CREATE TEXT SEARCH CONFIGURATION chamkho (PARSER = chamkho_parser);
 CREATE TEXT SEARCH CONFIGURATION
 d4=# ALTER TEXT SEARCH CONFIGURATION chamkho ADD MAPPING FOR word WITH simple;
 ALTER TEXT SEARCH CONFIGURATION
-d4=# select to_tsvector('chamkho',
+d4=# SELECT to_tsvector('chamkho',
   'វេវចនានុក្រមពហុភាសាដោយឥតគិតថ្លៃฉันกินข้าวၵႂၢမ်းတႆးလိၵ်ႈတႆးຈະຊອກຫາອີ່ຫຍັງ本日のお仕事終了しましたpop musicရှေးန်မာမင်း အဆက်ဆက်ကတည်း');
 to_tsvector
 'music':27 'pop':26 'กินข้าว':9 'ฉัน':8 'ຈະ':14 'ຊອກ':15 'ຫຍັງ':19 'ຫາ':16 'ອີ':17 '່':18 'က':34 'တည်း:35 'တႆး:11,13 'န':29
