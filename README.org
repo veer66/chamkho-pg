@@ -50,7 +50,7 @@ https://youtube.com/watch?v=C6o71HQXTaQ
 
 chamkho-pg uses [[https://github.com/pgcentralfoundation/pgrx][pgrx]] and currently supports PostgreSQL 15, 16, 17, and 18 on both GNU/Linux and macOS.
 
-Current Docker images are built with PostgreSQL 16.6.
+Current Docker images are built with PostgreSQL 18.
 
 * Example
 
