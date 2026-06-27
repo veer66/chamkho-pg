@@ -1,17 +1,15 @@
-#!/bin/sh
+#!/bin/bash
+set -e
 
-# Copy the library with the correct extension
-if [ "$(uname)" = "Darwin" ]; then
-    # Depending on the brew formula version, the expected extension can be either .dylib or .so
-    cp "target/release/libchamkho_parser.dylib" "$(pg_config --libdir)/postgresql/chamkho_parser.dylib"
-    ln -sf "$(pg_config --libdir)/postgresql/chamkho_parser.dylib" "$(pg_config --libdir)/postgresql/chamkho_parser.so"
-else
-    cp "target/release/libchamkho_parser.so" "$(pg_config --pkglibdir)/chamkho_parser.so"
-fi
+# Install the extension via pgrx
+cargo pgrx install --release "$@"
 
-# Copy extension files
-cp control/*.control sql/*.sql "$(pg_config --sharedir)/extension"
+# Get PostgreSQL share directory
+PG_SHARE_DIR=$(pg_config --sharedir)
 
+# Install dictionary data
+echo "Installing dictionary data to ${PG_SHARE_DIR}/tsearch_data/"
+mkdir -p "${PG_SHARE_DIR}/tsearch_data"
+cp tsearch_data/chamkho_dict.txt "${PG_SHARE_DIR}/tsearch_data/"
 
-# Copy the dictionary
-cp data/chamkho_dict.txt "$(pg_config --sharedir)/tsearch_data/"
+echo "Installation complete."
